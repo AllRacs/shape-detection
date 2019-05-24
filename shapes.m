@@ -1,7 +1,7 @@
 video = VideoReader('video\Sillas_1_2019_lenta.mp4');
 final = VideoWriter('vprocesado.mp4', 'MPEG-4');
 open(final);
-video.CurrentTime = 80;
+
 while hasFrame(video)
     tic;
     
