@@ -1,10 +1,10 @@
-video = VideoReader('Sillas_1_2019_lenta.mp4');
+video = VideoReader('video\Sillas_1_2019_lenta.mp4');
 final = VideoWriter('GermyVideo.mp4', 'MPEG-4');
 %viewer = vision.DeployableVideoPlayer;
-opticFlow = opticalFlowHS;
+
 open(final);
-tic;
 while hasFrame(video)
+    tic;
     img = readFrame(video);
     [img1,img2] = createMask(img);
     cc = bwconncomp(img1);
@@ -21,9 +21,11 @@ while hasFrame(video)
     L2 = labelmatrix(cc2);
     s2 = regionprops(L2, 'BoundingBox');
     bounding = [s2.BoundingBox];
-     si = size(bounding);
+    
+    si = size(bounding);
     si = si(2);
     nboun = si/4;
+    
     bounding2 = zeros(1,4);
     if nboun > 1
         bounding2 = bounding(si-3:si);
@@ -47,8 +49,16 @@ while hasFrame(video)
     
     imshow(triangulo);
     writeVideo(final, triangulo);
+    for i=1:3
+        if hasFrame(video)
+            aux = readFrame(video);
+            tri = insertObjectAnnotation(aux, 'Rectangle', bounding2, str);
+            tri = insertShape(tri, 'Rectangle', bounding2, 'LineWidth', 5);
+            writeVideo(final, tri);
+        end
+    end
+    toc
 end
-toc
 close(final);
 implay(final);
 
