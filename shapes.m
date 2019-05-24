@@ -1,6 +1,7 @@
 video = VideoReader('Sillas_1_2019_lenta.mp4');
-final = VideoWriter('GermyVideo7grfffgkdffff5tgfrtd6.avi', 'MPEG-4');
+final = VideoWriter('GermyVideo.mp4', 'MPEG-4');
 %viewer = vision.DeployableVideoPlayer;
+opticFlow = opticalFlowHS;
 open(final);
 tic;
 while hasFrame(video)
@@ -10,7 +11,7 @@ while hasFrame(video)
     L = labelmatrix(cc);
     s = regionprops(L, 'Area', 'Perimeter', 'BoundingBox', 'Extent', 'Eccentricity');
     a = [s.Area];
-    %b = [s.Perimeter];
+    b = [s.Perimeter];
     ex = [s.Extent];
     ecc = [s.Eccentricity];
     %triangularidad = (4*pi*a)./(b.*b);
@@ -20,54 +21,34 @@ while hasFrame(video)
     L2 = labelmatrix(cc2);
     s2 = regionprops(L2, 'BoundingBox');
     bounding = [s2.BoundingBox];
-    lengthB = size(bounding);
-    numObj = lengthB/4;
-    numObj(2)
-    if numObj(2) == 1 
-        triangulo = insertShape(img,'Rectangle', bounding, 'LineWidth', 5);
-        %depVideoPlayer(triangulo);
-		hImage = subplot(2, 2, 1);
-        title('Detección Triangulo RGB');
-		imshow(triangulo);
-        hImageB = subplot(2, 2, 2);
-        title('Detección Formas');
-		imshow(img1);
-        hImageB2 = subplot(2, 2, 3);
-        title('Detección Triangulo BW');
-        imshow(bw2);
-		drawnow; % Refrescar.
-        writeVideo(final, triangulo);
-    elseif numObj(2) > 1
-        triangulo = insertShape(img,'Rectangle', [bounding(5) bounding(6) bounding(7) bounding(8)], 'LineWidth', 5);
-        %depVideoPlayer(triangulo);
-		hImage = subplot(2, 2, 1);
-        title('Detección Triangulo RGB');
-		imshow(triangulo);
-        hImageB = subplot(2, 2, 2);
-        title('Detección Formas');
-		imshow(img1);
-        hImageB2 = subplot(2, 2, 3);
-        title('Detección Triangulo BW');
-        imshow(bw2);
-		drawnow; % Refrescar.
-        writeVideo(final, triangulo);
-    elseif numObj(2) == 0
-        %depVideoPlayer(img);
-		hImage = subplot(2, 2, 1);
-        title('Detección Triangulo RGB');
-		imshow(img);
-        hImageB = subplot(2, 2, 2);
-        title('Detección Formas');
-		imshow(img1);
-        hImageB2 = subplot(2, 2, 3);
-        title('Detección Triangulo BW');
-        imshow(bw2);
-		drawnow; % Refrescar.
-        writeVideo(final, img);
+     si = size(bounding);
+    si = si(2);
+    nboun = si/4;
+    bounding2 = zeros(1,4);
+    if nboun > 1
+        bounding2 = bounding(si-3:si);
+    elseif nboun == 1
+        bounding2 = bounding;
     end
+    
+    str = ['Perimetro: ' num2str(max(b)), fprintf('\n') 'Area: ' num2str(max(a))];
+    triangulo = insertObjectAnnotation(img, 'Rectangle', bounding2, str, 'FontSize', 20);
+    triangulo = insertShape(triangulo, 'Rectangle', bounding2, 'LineWidth', 5);
+    hImage = subplot(2, 2, 1);
+    imshow(triangulo);
+    title('Detección Triangulo RGB');
+    hImageB = subplot(2, 2, 2);
+    imshow(img1);
+    title('Detección Formas');
+    hImageB2 = subplot(2, 2, 3);
+    imshow(bw2);
+    title('Detección Triangulo BW');
+    drawnow; % Refrescar.
+    
+    imshow(triangulo);
+    writeVideo(final, triangulo);
 end
 toc
 close(final);
 implay(final);
-
 
